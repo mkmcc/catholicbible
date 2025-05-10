@@ -1,0 +1,54 @@
+#!/usr/bin/env ruby
+require 'shellwords'
+require 'optparse'
+
+options = {
+  format: 'latex',
+  out: nil,
+  emacs: 'emacs',
+  script: File.join(__dir__, 'catholicbible-cli.el')
+}
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: catholicbible [options] TRANSLATION BOOK CHAPTER RANGE"
+
+  opts.on("-f", "--format FORMAT", "Output format (latex, text)") { |f| options[:format] = f }
+  opts.on("-t", "--tex", "Use LaTeX output format")               { options[:format] = 'latex' }
+  opts.on("-o", "--out FILE", "Write output to FILE")            { |f| options[:out] = f }
+  opts.on("-e", "--emacs PATH", "Emacs binary (default: emacs)") { |e| options[:emacs] = e }
+  opts.on("-s", "--script PATH", "Path to catholicbible-cli.el") { |s| options[:script] = s }
+  opts.on("-h", "--help", "Show this help message") do
+    puts opts
+    exit
+  end
+end.parse!
+
+# Positional args
+if ARGV.length < 4
+  abort("Missing arguments. Use --help for usage.")
+end
+
+translation, book, chapter, range = ARGV
+
+# Run emacs --script ...
+cmd = [
+  options[:emacs],
+  '--script', options[:script],
+  translation, book, chapter, range, options[:format]
+]
+
+output = `#{cmd.shelljoin}`
+
+if $?.success?
+  if options[:out]
+    File.write(options[:out], output)
+  else
+    puts output
+  end
+else
+  abort("Error: Emacs script failed:\n#{output}")
+end
+
+# Local Variables:
+# mode: ruby
+# End:
