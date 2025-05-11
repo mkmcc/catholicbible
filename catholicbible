@@ -5,8 +5,7 @@ require 'optparse'
 options = {
   format: 'latex',
   out: nil,
-  emacs: 'emacs',
-  script: File.join(__dir__, 'catholicbible-cli.el')
+  emacs: 'emacs'
 }
 
 OptionParser.new do |opts|
@@ -16,7 +15,6 @@ OptionParser.new do |opts|
   opts.on("-t", "--tex", "Use LaTeX output format")               { options[:format] = 'latex' }
   opts.on("-o", "--out FILE", "Write output to FILE")            { |f| options[:out] = f }
   opts.on("-e", "--emacs PATH", "Emacs binary (default: emacs)") { |e| options[:emacs] = e }
-  opts.on("-s", "--script PATH", "Path to catholicbible-cli.el") { |s| options[:script] = s }
   opts.on("-h", "--help", "Show this help message") do
     puts opts
     exit
@@ -30,10 +28,19 @@ end
 
 translation, book, chapter, range = ARGV
 
+
+# Determine which Emacs script to call
+emacs_script =
+  if translation.downcase == "esv"
+    File.join(__dir__, 'esv-cli.el')
+  else
+    File.join(__dir__, 'catholicbible-cli.el')
+  end
+
 # Run emacs --script ...
 cmd = [
   options[:emacs],
-  '--script', options[:script],
+  '--script', emacs_script,
   translation, book, chapter, range, options[:format]
 ]
 
