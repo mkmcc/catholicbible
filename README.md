@@ -87,15 +87,8 @@ one day.
  (:verse 8 :text "Et pastores erant in regione eadem vigilantes, et custodientes vigilias noctis super gregem suum.")
  (:verse 9 :text "Et ecce angelus Domini stetit juxta illos, et claritas Dei circumfulsit illos, et timuerunt timore magno.")
  (:verse 10 :text "Et dixit illis angelus: Nolite timere: ecce enim evangelizo vobis gaudium magnum, quod erit omni populo:"))
-"((:verse 1 :text \"Factum est autem in diebus illis, exiit edictum a Cæsare Augusto ut describeretur universus orbis.\")
- (:verse 2 :text \"Hæc descriptio prima facta est a præside Syriæ Cyrino:\")
- (:verse 3 :text \"et ibant omnes ut profiterentur singuli in suam civitatem.\")
- (:verse 4 :text \"Ascendit autem et Joseph a Galilæa de civitate Nazareth in Judæam, in civitatem David, quæ vocatur Bethlehem: eo quod esset de domo et familia David,\")
- (:verse 5 :text \"ut profiteretur cum Maria desponsata sibi uxore prægnante.\")
- (:verse 6 :text \"Factum est autem, cum essent ibi, impleti sunt dies ut pareret.\")
- (:verse 7 :text \"Et peperit filium suum primogenitum, et pannis eum involvit, et reclinavit eum in præsepio: quia non erat eis locus in diversorio.\")
- (:verse 8 :text \"Et pastores erant in regione eadem vigilantes, et custodientes vigilias noctis super gregem suum.\")
- (:verse 9 :text \"Et ecce angelus Domini stetit juxta illos, et claritas Dei circumfulsit illos, et timuerunt timore magno.\")
- (:verse 10 :text \"Et dixit illis angelus: Nolite timere: ecce enim evangelizo vobis gaudium magnum, quod erit omni populo:\"))
-
 ```
+
+<!-- Local Variables: -->
+<!-- mode: markdown -->
+<!-- End: -->
