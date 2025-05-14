@@ -300,15 +300,16 @@ Verse texts are printed inline, with paragraph breaks preserved. Ellipses insert
   "Prompt for TRANSLATION-NAME, BOOK-NAME, CHAPTER, and RANGE.
 Then insert LaTeX-formatted verses at point."
   (interactive
-   (let* ((translation (completing-read "Translation: " '("knox" "douay_rheims" "vulgate") nil t))
-          (book (completing-read "Book name: " catholicbible-canonical-list nil t))
-          (max-ch (cdr (assoc (list translation book) catholicbible--chapternums)))
-          (chapter-str (completing-read
-                        (format "Chapter (1-%d): " max-ch)
-                        (mapcar #'number-to-string (number-sequence 1 max-ch))
-                        nil t))
-          (range (read-string "Verse range (e.g. 4 or 1-5 or 1,3,7-10): ")))
-     (list translation book (string-to-number chapter-str) range)))
+   (let ((completion-ignore-case t))  ;; makes all completions case-insensitive
+     (let* ((translation (completing-read "Translation: " '("knox" "douay_rheims" "vulgate") nil t))
+            (book (completing-read "Book name: " catholicbible-canonical-list nil t))
+            (max-ch (cdr (assoc (list translation book) catholicbible--chapternums)))
+            (chapter-str (completing-read
+                          (format "Chapter (1-%d): " max-ch)
+                          (mapcar #'number-to-string (number-sequence 1 max-ch))
+                          nil t))
+            (range (read-string "Verse range (e.g. 4 or 1-5 or 1,3,7-10): ")))
+       (list translation book (string-to-number chapter-str) range))))
   (insert
    (catholicbible-format-verses-latex translation-name book-name chapter range)))
 
