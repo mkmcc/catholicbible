@@ -295,3 +295,20 @@ Verse texts are printed inline, with paragraph breaks preserved. Ellipses insert
            (string-join verselines "\n")
            "\\end{scripture}")
      "\n")))
+
+(defun catholicbible-insert-verses-latex (translation-name book-name chapter range)
+  "Prompt for TRANSLATION-NAME, BOOK-NAME, CHAPTER, and RANGE.
+Then insert LaTeX-formatted verses at point."
+  (interactive
+   (list
+    (completing-read "Translation: " '("knox" "douay_rheims" "vulgate") nil t)
+    (completing-read "Book name: " catholicbible-canonical-list nil t)
+    (read-number "Chapter: ")
+    (read-string "Verse range (e.g. 4 or 1-5 or 1,3,7-10): ")))
+  (insert
+   (catholicbible-format-verses-latex translation-name book-name chapter range)))
+
+(defun catholicbible--setup-latex-bindings ()
+  (local-set-key (kbd "C-c v") #'catholicbible-insert-verses-latex))
+
+(add-hook 'latex-mode-hook #'catholicbible--setup-latex-bindings)
