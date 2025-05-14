@@ -11,6 +11,7 @@
 (require 'catholicbible)
 (require 'esv)
 (require 'esv-secrets)
+(require 'kjv)
 
 (defun bible--which-backend (translation)
   "Return the backend symbol ('catholic or 'esv) for TRANSLATION."
@@ -18,6 +19,7 @@
     (cond
      ((member canon '("knox" "vulgate" "douay_rheims")) 'catholic)
      ((string= canon "esv") 'esv)
+     ((string= canon "kjv") 'kjv)
      (t (error "Unknown translation: %s" translation)))))
 
 ;;; Unified API
@@ -26,13 +28,15 @@
   "Return plain-text version of the verses."
   (pcase (bible--which-backend translation)
     ('catholic (catholicbible-format-verses-text translation book chapter range))
-    ('esv      (esv-format-verses-text (format "%s %d:%s" book chapter range)))))
+    ('esv      (esv-format-verses-text (format "%s %d:%s" book chapter range)))
+    ('kjv      (kjv-format-verses-text book chapter range))))
 
 (defun bible-format-verses-latex (translation book chapter range)
   "Return LaTeX-formatted version of the verses."
   (pcase (bible--which-backend translation)
     ('catholic (catholicbible-format-verses-latex translation book chapter range))
-    ('esv      (esv-format-verses-latex (format "%s %d:%s" book chapter range)))))
+    ('esv      (esv-format-verses-latex (format "%s %d:%s" book chapter range)))
+    ('kjv      (kjv-format-verses-latex book chapter range))))
 
 (defun bible-insert-verses-latex (translation-name book-name chapter range)
   "Prompt for TRANSLATION-NAME, BOOK-NAME, CHAPTER, and RANGE.
@@ -40,7 +44,9 @@ Then insert LaTeX-formatted verses at point."
   (interactive
    (let ((completion-ignore-case t))  ;; makes all completions case-insensitive
      (let* ((translation
-             (completing-read "Translation: " '("knox" "douay_rheims" "vulgate" "esv") nil t))
+             (completing-read "Translation: "
+                              '("knox" "douay_rheims" "vulgate" "esv" "kjv")
+                              nil t))
             (book
              (completing-read "Book name: " catholicbible-canonical-list nil t))
             (max-ch

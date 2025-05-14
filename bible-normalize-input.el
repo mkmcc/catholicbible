@@ -109,7 +109,8 @@
     ("douay"        . "douay_rheims")
     ("douay-rheims" . "douay_rheims")
     ("d-r"          . "douay_rheims")
-    ("esv"          . "esv"))
+    ("esv"          . "esv")
+    ("kjv"          . "kjv"))
   "Mapping of lowercase translation aliases to canonical internal translation names.")
 
 (defun bible--normalize-translation (name)
