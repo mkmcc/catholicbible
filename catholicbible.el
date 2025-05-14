@@ -9,6 +9,11 @@
 ;; - s.el
 ;; - catholicbible-books.el (book name mappings)
 
+;; TODO:
+;; 1. unify with esv.el
+;; 2. make an emacs command to insert latex at point.  should ask for
+;; needed info
+
 (provide 'catholicbible)
 
 (require 'elquery)
@@ -158,24 +163,58 @@ TRANSLATION is standardized, CHAPTER is an integer"
      (or separator "")))
    (t "")))
 
-(defun catholicbible--content-text (content-node)
-  "Return cleaned text from CONTENT-NODE, stripping links and preserving paragraph breaks."
-  (let* ((children (catholicbible--strip-content-links content-node))
+;;; Knox: should remove links
+;; <div class="vers-content">After this, God said, Let the waters
+;; produce moving things that have life in them, and winged things that
+;; fly above the earth under the sky’s vault.<a href=""
+;; class="inline-comment" data-comment-id="1">✻</a></div>
+
+;;; Douay-Rheims: should not remove links
+;; <div class="vers-content">And God blessed them, saying: <a href=""
+;; class="inline-comment" data-comment-id="3672">Increase and
+;; multiply</a>, and fill the earth, and subdue it, and rule over the
+;; fishes of the sea, and the fowls of the air, and all living
+;; creatures that move upon the earth.</div>
+
+(defun catholicbible--content-text-knox (content-node)
+  "Return cleaned text from CONTENT-NODE, stripping links and preserving <br> paragraph breaks."
+  (let* ((children (catholicbible--strip-content-links content-node)) ; * comments
          (texts (-map #'catholicbible--full-text children)))
     (string-join texts "")))
 
-(defun catholicbible--parse-verse (verse)
+(defun catholicbible--content-text-vulgate (content-node)
+  "Return cleaned text from CONTENT-NODE, preserving <br> paragraph breaks."
+  (let* ((children (plist-get content-node :children))
+         (texts (-map #'catholicbible--full-text children)))
+    (string-join texts "")))
+
+(defun catholicbible--content-text-drb (content-node)
+  "Return cleaned text from CONTENT-NODE, stripping links and preserving paragraph breaks."
+  (elquery-full-text content-node))
+
+(defun catholicbible--content-text (translation content-node)
+  (cond
+   ((string= translation "knox")
+    (catholicbible--content-text-knox content-node))
+   ((string= translation "douay_rheims")
+    (catholicbible--content-text-drb content-node))
+   ((string= translation "vulgate")
+    (catholicbible--content-text-vulgate content-node))
+   (t
+    (error (format "Unknown translation %s" translation)))))
+
+(defun catholicbible--parse-verse (translation verse)
   "Parse a single VERSE node and return (:verse N :text TEXT)."
   (let* ((no-node (car (elquery-$ "div.vers-no" verse)))
          (content-node (car (elquery-$ "div.vers-content" verse)))
          (verse-num (string-to-number (elquery-text no-node)))
-         (text (catholicbible--content-text content-node)))
+         (text (catholicbible--content-text translation content-node)))
     `(:verse ,verse-num :text ,text)))
 
-(defun catholicbible--parse-verses (dom)
+(defun catholicbible--parse-verses (translation dom)
   "Parse all verse nodes in DOM into a list of (:verse N :text ...) plists."
   (->> (elquery-$ "div.verses div.vers" dom)
-       (-map #'catholicbible--parse-verse)
+       (-map (-partial #'catholicbible--parse-verse translation))
        (-sort (lambda (a b) (< (plist-get a :verse)
                                (plist-get b :verse))))))
 
@@ -187,7 +226,7 @@ RANGE may be a number, a string range, or a list of integers."
   (let* ((wanted (cond ((listp range) range)
                        (t (catholicbible--expand-verse-spec range))))
          (dom (catholicbible--fetch-chapter translation canonical-book-name chapter))
-         (verses (catholicbible--parse-verses dom)))
+         (verses (catholicbible--parse-verses translation dom)))
     (--filter (member (plist-get it :verse) wanted) verses)))
 
 (defun catholicbible--interleave-ellipsis (blocks)
