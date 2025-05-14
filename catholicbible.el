@@ -11,8 +11,6 @@
 
 ;; TODO:
 ;; 1. unify with esv.el
-;; 2. make an emacs command to insert latex at point.  should ask for
-;; needed info
 
 (provide 'catholicbible)
 
@@ -96,11 +94,20 @@ RANGE may be a number, a string like \"14-20\" or \"5\"."
   (make-directory (file-name-directory path) t))
 
 (defun catholicbible--get-html-body-raw (url)
-  "Fetch URL and return trimmed HTML body, skipping HTTP headers."
-  (with-current-buffer (url-retrieve-synchronously url t t 10)
-    (goto-char (point-min))
-    (re-search-forward "\n\n" nil 'move)
-    (s-trim (buffer-substring-no-properties (point) (point-max)))))
+  "Fetch URL and return trimmed HTML body, skipping HTTP headers.
+Returns nil if the request fails."
+  (let ((buf (url-retrieve-synchronously url t t 10)))
+    (if (not (buffer-live-p buf))
+        (progn
+          (message "Failed to fetch: %s" url)
+          nil)
+      (with-current-buffer buf
+        (goto-char (point-min))
+        (if (re-search-forward "\n\n" nil t)
+            (s-trim (buffer-substring-no-properties (point) (point-max)))
+          (progn
+            (message "No header-body separator found: %s" url)
+            nil))))))
 
 (defun catholicbible--fix-encoding (html)
   (let* ((html1 (decode-coding-string html 'utf-8 t))
@@ -108,8 +115,10 @@ RANGE may be a number, a string like \"14-20\" or \"5\"."
     html2))
 
 (defun catholicbible--get-html-body (url)
-  (catholicbible--fix-encoding
-   (catholicbible--get-html-body-raw url)))
+  "Fetch and decode the HTML body at URL, or return nil on failure."
+  (let ((raw (catholicbible--get-html-body-raw url)))
+    (when raw
+      (catholicbible--fix-encoding raw))))
 
 (defun catholicbible--fetch-chapter-helper (translation url-path chapter)
   "Return elquery DOM of the requested chapter, caching it if needed.
@@ -120,6 +129,8 @@ TRANSLATION is standardized, CHAPTER is an integer"
     (if (file-exists-p path)
         (elquery-read-file path)
       (let ((html (catholicbible--get-html-body url)))
+        (unless html
+          (error "Download failed: %s" url))
         (with-temp-buffer
           (set-buffer-file-coding-system 'utf-8)
           (insert html)
