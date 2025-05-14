@@ -314,7 +314,7 @@ Then insert LaTeX-formatted verses at point."
    (let ((completion-ignore-case t))  ;; makes all completions case-insensitive
      (let* ((translation (completing-read "Translation: " '("knox" "douay_rheims" "vulgate") nil t))
             (book (completing-read "Book name: " catholicbible-canonical-list nil t))
-            (max-ch (cdr (assoc (list translation book) catholicbible--chapternums)))
+            (max-ch (catholicbible--get-chapnum translation book))
             (chapter-str (completing-read
                           (format "Chapter (1-%d): " max-ch)
                           (mapcar #'number-to-string (number-sequence 1 max-ch))
