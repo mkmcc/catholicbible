@@ -84,7 +84,7 @@
     ("2 John"          . (:name "2 John"           :url-path "/NT/2_Jn"))
     ("3 John"          . (:name "3 John"           :url-path "/NT/3_Jn"))
     ("Jude"            . (:name "Jude"             :url-path "/NT/Jud"))
-    ("Revelation")     . (:name "Apocalypse"       :url-path "/NT/Apoc"))
+    ("Revelation"      . (:name "Apocalypse"       :url-path "/NT/Apoc")))
   "CDR is the canonical name; CAR is a plist with the translation name and URL path")
 
 (defconst catholicbible--douay-rheims-books
@@ -160,7 +160,7 @@
     ("2 John"          . (:name "2 John"                :url-path "/NT/2_Jn"))
     ("3 John"          . (:name "3 John"                :url-path "/NT/3_Jn"))
     ("Jude"            . (:name "Jude"                  :url-path "/NT/Jud"))
-    ("Revelation")     . (:name "Apocalypse"            :url-path "/NT/Apoc"))
+    ("Revelation"      . (:name "Apocalypse"            :url-path "/NT/Apoc")))
   "CDR is the canonical name; CAR is a plist with the translation name and URL path")
 
 (defconst catholicbible--vulgate-books
