@@ -9,7 +9,7 @@ options = {
 }
 
 OptionParser.new do |opts|
-  opts.banner = "Usage: catholicbible [options] TRANSLATION BOOK CHAPTER RANGE"
+  opts.banner = "Usage: bible [options] TRANSLATION BOOK CHAPTER RANGE"
 
   opts.on("-f", "--format FORMAT", "Output format (latex, text)") { |f| options[:format] = f }
   opts.on("-t", "--tex", "Use LaTeX output format")               { options[:format] = 'latex' }
@@ -21,26 +21,17 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-# Positional args
 if ARGV.length < 4
   abort("Missing arguments. Use --help for usage.")
 end
 
 translation, book, chapter, range = ARGV
 
+script_path = File.join(__dir__, 'bible-cli.el')
 
-# Determine which Emacs script to call
-emacs_script =
-  if translation.downcase == "esv"
-    File.join(__dir__, 'esv-cli.el')
-  else
-    File.join(__dir__, 'catholicbible-cli.el')
-  end
-
-# Run emacs --script ...
 cmd = [
   options[:emacs],
-  '--script', emacs_script,
+  '--script', script_path,
   translation, book, chapter, range, options[:format]
 ]
 

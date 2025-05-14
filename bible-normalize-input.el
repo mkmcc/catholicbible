@@ -1,10 +1,10 @@
-;;; catholicbible-normalize-input.el ---  -*- lexical-binding: t; -*-
+;;; bible-normalize-input.el ---  -*- lexical-binding: t; -*-
 
-(provide 'catholicbible-normalize-input)
+(provide 'bible-normalize-input)
 
-(require 'catholicbible-canonical-book-list)
+(require 'bible-canonical-book-list)
 
-(defconst catholicbible--book-aliases-raw
+(defconst bible--book-aliases-raw
   '((("Genesis" "Gen" "Gn") . "Genesis")
     (("Exodus" "Exod" "Ex") . "Exodus")
     (("Leviticus" "Lev" "Lv") . "Leviticus")
@@ -80,9 +80,9 @@
     (("Revelation" "Rev" "Apocalypse" "Apoc" "Apocalypsis") . "Revelation"))
   "Mapping of input names to canonical names")
 
-(defvar catholicbible--book-alias-table
+(defvar bible--book-alias-table
   (let ((table (make-hash-table :test #'equal)))
-    (dolist (entry catholicbible--book-aliases-raw)
+    (dolist (entry bible--book-aliases-raw)
       (let ((aliases (car entry))
             (canonical (cdr entry)))
         (dolist (alias aliases)
@@ -90,15 +90,15 @@
     table)
   "Hash table mapping lowercased aliases to canonical book names.")
 
-(defun catholicbible--canonical-book-name (input)
+(defun bible--canonical-book-name (input)
   "Return canonical book name from INPUT, or signal an error."
   (let ((key (downcase input)))
-    (or (gethash key catholicbible--book-alias-table)
+    (or (gethash key bible--book-alias-table)
         (error "Unknown book name: %s" input))))
 
 
 
-(defconst catholicbible--translation-aliases
+(defconst bible--translation-aliases
   '(("knox"         . "knox")
     ("knox bible"   . "knox")
     ("knx"          . "knox")
@@ -108,12 +108,13 @@
     ("drb"          . "douay_rheims")
     ("douay"        . "douay_rheims")
     ("douay-rheims" . "douay_rheims")
-    ("d-r"          . "douay_rheims"))
+    ("d-r"          . "douay_rheims")
+    ("esv"          . "esv"))
   "Mapping of lowercase translation aliases to canonical internal translation names.")
 
-(defun catholicbible--normalize-translation (name)
+(defun bible--normalize-translation (name)
   "Return canonical translation name for NAME (e.g., 'drb' → 'douay_rheims').
 Raises error if unknown."
   (let* ((key (downcase name))
-         (norm (assoc-default key catholicbible--translation-aliases #'string=)))
+         (norm (assoc-default key bible--translation-aliases #'string=)))
     (or norm (error "Unknown translation: %s" name))))

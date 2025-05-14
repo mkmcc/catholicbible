@@ -1,16 +1,14 @@
 ;;; catholicbible.el --- Bible verse fetching and formatting -*- lexical-binding: t; -*-
 
-;; Core interface for retrieving and formatting Bible verses from
+;; Interface for retrieving and formatting Bible verses from
 ;; https://catholicbible.online for multiple translations.
 
 ;; Depends on:
 ;; - elquery.el (HTML DOM parsing)
 ;; - dash.el
 ;; - s.el
-;; - catholicbible-books.el (book name mappings)
+;; - bible-translation-books.el
 
-;; TODO:
-;; 1. unify with esv.el
 
 (provide 'catholicbible)
 
@@ -19,10 +17,10 @@
 (require 's)
 (require 'dash)
 
-(require 'catholicbible-normalize-input)
-(require 'catholicbible-translation-books)
+(require 'bible-normalize-input)
+(require 'bible-translation-books)
 
-(defvar catholicbible-cachedir
+(defvar bible-cachedir
   (expand-file-name ".biblecache/" (getenv "HOME"))
   "Root directory for cached Bible chapters.")
 
@@ -36,7 +34,7 @@
 
 (defun catholicbible--translation-label (name)
   "Return user-facing label (e.g., 'DRB') for canonical translation NAME."
-  (let ((name_std (catholicbible--normalize-translation name)))
+  (let ((name_std (bible--normalize-translation name)))
       (or (cdr (assoc name_std catholicbible--translation-labels))
           name)))  ;; fallback: show canonical name if not found
 
@@ -88,7 +86,7 @@ RANGE may be a number, a string like \"14-20\" or \"5\"."
 (defun catholicbible--chapter-path (translation url-path chapter)
   (expand-file-name
    (format "%s/%s/ch_%d.html" translation url-path chapter)
-   catholicbible-cachedir))
+   bible-cachedir))
 
 (defun catholicbible--ensure-dir (path)
   (make-directory (file-name-directory path) t))
@@ -139,7 +137,7 @@ TRANSLATION is standardized, CHAPTER is an integer"
 
 (defun catholicbible--fetch-chapter (translation canonical-book-name chapter)
   (let* ((pdata
-          (catholicbible--normalize-book translation canonical-book-name))
+          (bible--normalize-book translation canonical-book-name))
          (url-path (plist-get pdata :url-path))
          (name (plist-get pdata :name)))
     (catholicbible--fetch-chapter-helper translation url-path chapter)))
@@ -270,8 +268,8 @@ Returns a flat list of plists."
 (defun catholicbible-format-verses-text (translation-name book-name chapter range)
   "Format a list of verse plists and `(:ellipsis t)` markers into a natural paragraph string.
 Verse texts are printed inline, with paragraph breaks preserved. Ellipses insert spacing."
-  (let* ((translation (catholicbible--normalize-translation translation-name))
-         (canonical-book-name (catholicbible--canonical-book-name book-name))
+  (let* ((translation (bible--normalize-translation translation-name))
+         (canonical-book-name (bible--canonical-book-name book-name))
          (items
           (catholicbible-get-verses translation canonical-book-name chapter range)))
       (s-join "" (-map #'catholicbible--format-verse-text items))))
@@ -289,13 +287,13 @@ Verse texts are printed inline, with paragraph breaks preserved. Ellipses insert
 (defun catholicbible-format-verses-latex (translation-name book-name chapter range)
   "Format a scripture block for TRANSLATION, BOOK, CHAPTER, and RANGE using the LaTeX scripture package."
   (let* ((translation
-          (catholicbible--normalize-translation translation-name))
+          (bible--normalize-translation translation-name))
          (canonical-book-name
-          (catholicbible--canonical-book-name book-name))
+          (bible--canonical-book-name book-name))
          (translation-label
           (catholicbible--translation-label translation))
          (translation-book-name
-          (plist-get (catholicbible--normalize-book translation canonical-book-name) :name))
+          (plist-get (bible--normalize-book translation canonical-book-name) :name))
          (titlestring
           (format "%s %s:%s (%s)" translation-book-name chapter range translation-label))
          (verses
@@ -306,25 +304,3 @@ Verse texts are printed inline, with paragraph breaks preserved. Ellipses insert
            (string-join verselines "\n")
            "\\end{scripture}")
      "\n")))
-
-(defun catholicbible-insert-verses-latex (translation-name book-name chapter range)
-  "Prompt for TRANSLATION-NAME, BOOK-NAME, CHAPTER, and RANGE.
-Then insert LaTeX-formatted verses at point."
-  (interactive
-   (let ((completion-ignore-case t))  ;; makes all completions case-insensitive
-     (let* ((translation (completing-read "Translation: " '("knox" "douay_rheims" "vulgate") nil t))
-            (book (completing-read "Book name: " catholicbible-canonical-list nil t))
-            (max-ch (catholicbible--get-chapnum translation book))
-            (chapter-str (completing-read
-                          (format "Chapter (1-%d): " max-ch)
-                          (mapcar #'number-to-string (number-sequence 1 max-ch))
-                          nil t))
-            (range (read-string "Verse range (e.g. 4 or 1-5 or 1,3,7-10): ")))
-       (list translation book (string-to-number chapter-str) range))))
-  (insert
-   (catholicbible-format-verses-latex translation-name book-name chapter range)))
-
-(defun catholicbible--setup-latex-bindings ()
-  (local-set-key (kbd "C-c v") #'catholicbible-insert-verses-latex))
-
-(add-hook 'latex-mode-hook #'catholicbible--setup-latex-bindings)

@@ -1,8 +1,8 @@
-;;; catholicbible-canonical-book-list.el ---  -*- lexical-binding: t; -*-
+;;; bible-canonical-book-list.el ---  -*- lexical-binding: t; -*-
 
-(provide 'catholicbible-canonical-book-list)
+(provide 'bible-canonical-book-list)
 
-(defconst catholicbible-canonical-list
+(defconst bible-canonical-list
   '(;; --- Old Testament ---
     "Genesis" "Exodus" "Leviticus" "Numbers" "Deuteronomy" "Joshua" "Judges" "Ruth"
     "1 Samuel" "2 Samuel" "1 Kings" "2 Kings" "1 Chronicles" "2 Chronicles"

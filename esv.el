@@ -27,7 +27,7 @@
     (concat base-url "?" query-string)))
 
 
-(defun esv--fetch-text (reference)
+(defun esv-format-verses-text (reference)
   "Fetch the passage text for REFERENCE from the ESV API."
   (esv--require-token)
   (let ((url-request-extra-headers
@@ -51,9 +51,9 @@
   "Remove (ESV) note from text.  We add it back below."
   (s-replace "(ESV)" "" s))
 
-(defun esv-format-passage-latex (reference)
+(defun esv-format-verses-latex (reference)
   "Return LaTeX-formatted ESV passage for REFERENCE string."
-  (let* ((raw (esv--fetch-text reference))
+  (let* ((raw (esv-format-verses-text reference))
          (clean (esv--stripesv raw))
          (versified (esv--versify clean)))
     (format "\\begin{scripture}[%s (ESV)]\n%s\n\\end{scripture}"

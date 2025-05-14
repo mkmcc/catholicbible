@@ -1,11 +1,11 @@
-;;; catholicbible-translation-books.el --- -*- lexical-binding: t; -*-
+;;; bible-translation-books.el --- -*- lexical-binding: t; -*-
 
 ;; These are for retrieving and Bible verses from
 ;; https://catholicbible.online for multiple translations.
 
-(provide 'catholicbible-translation-books)
+(provide 'bible-translation-books)
 
-(require 'catholicbible-normalize-input)
+(require 'bible-normalize-input)
 
 (require 's)
 (require 'dash)
@@ -239,32 +239,98 @@
     ("Revelation"      . (:name "Apocalypsis"         :url-path "/NT/Apc"   :chaps 22)))
   "CDR is the canonical name; CAR is a plist with the translation name and URL path")
 
+(defconst esvbible--esv-books
+  '(("Genesis"         . (:name "Genesis"         :chaps 50))
+    ("Exodus"          . (:name "Exodus"          :chaps 40))
+    ("Leviticus"       . (:name "Leviticus"       :chaps 27))
+    ("Numbers"         . (:name "Numbers"         :chaps 36))
+    ("Deuteronomy"     . (:name "Deuteronomy"     :chaps 34))
+    ("Joshua"          . (:name "Joshua"          :chaps 24))
+    ("Judges"          . (:name "Judges"          :chaps 21))
+    ("Ruth"            . (:name "Ruth"            :chaps 4))
+    ("1 Samuel"        . (:name "1 Samuel"        :chaps 31))
+    ("2 Samuel"        . (:name "2 Samuel"        :chaps 24))
+    ("1 Kings"         . (:name "1 Kings"         :chaps 22))
+    ("2 Kings"         . (:name "2 Kings"         :chaps 25))
+    ("1 Chronicles"    . (:name "1 Chronicles"    :chaps 29))
+    ("2 Chronicles"    . (:name "2 Chronicles"    :chaps 36))
+    ("Ezra"            . (:name "Ezra"            :chaps 10))
+    ("Nehemiah"        . (:name "Nehemiah"        :chaps 13))
+    ("Esther"          . ((:name "Esther"         :chaps 10)))
+    ("Job"             . (:name "Job"             :chaps 42))
+    ("Psalms"          . (:name "Psalms"          :chaps 150))
+    ("Proverbs"        . (:name "Proverbs"        :chaps 31))
+    ("Ecclesiastes"    . (:name "Ecclesiastes"    :chaps 12))
+    ("Song of Songs"   . (:name "Song of Solomon" :chaps 8))
+    ("Isaiah"          . (:name "Isaiah"          :chaps 66))
+    ("Jeremiah"        . (:name "Jeremiah"        :chaps 52))
+    ("Lamentations"    . (:name "Lamentations"    :chaps 5))
+    ("Ezekiel"         . (:name "Ezekiel"         :chaps 48))
+    ("Daniel"          . (:name "Daniel"          :chaps 12))
+    ("Hosea"           . (:name "Hosea"           :chaps 14))
+    ("Joel"            . (:name "Joel"            :chaps 3))
+    ("Amos"            . (:name "Amos"            :chaps 9))
+    ("Obadiah"         . (:name "Obadiah"         :chaps 1))
+    ("Jonah"           . (:name "Jonah"           :chaps 4))
+    ("Micah"           . (:name "Micah"           :chaps 7))
+    ("Nahum"           . (:name "Nahum"           :chaps 3))
+    ("Habakkuk"        . (:name "Habakkuk"        :chaps 3))
+    ("Zephaniah"       . (:name "Zephaniah"       :chaps 3))
+    ("Haggai"          . (:name "Haggai"          :chaps 2))
+    ("Zechariah"       . (:name "Zechariah"       :chaps 14))
+    ("Malachi"         . (:name "Malachi"         :chaps 4))
+    ("Matthew"         . (:name "Matthew"         :chaps 28))
+    ("Mark"            . (:name "Mark"            :chaps 6))
+    ("Luke"            . (:name "Luke"            :chaps 24))
+    ("John"            . (:name "John"            :chaps 21))
+    ("Acts"            . (:name "Acts"            :chaps 28))
+    ("Romans"          . (:name "Romans"          :chaps 16))
+    ("1 Corinthians"   . (:name "1 Corinthians"   :chaps 16))
+    ("2 Corinthians"   . (:name "2 Corinthians"   :chaps 13))
+    ("Galatians"       . (:name "Galatians"       :chaps 6))
+    ("Ephesians"       . (:name "Ephesians"       :chaps 6))
+    ("Philippians"     . (:name "Philippians"     :chaps 4))
+    ("Colossians"      . (:name "Colossians"      :chaps 4))
+    ("1 Thessalonians" . (:name "1 Thessalonians" :chaps 5))
+    ("2 Thessalonians" . (:name "2 Thessalonians" :chaps 3))
+    ("1 Timothy"       . (:name "1 Timothy"       :chaps 6))
+    ("2 Timothy"       . (:name "2 Timothy"       :chaps 4))
+    ("Titus"           . (:name "Titus"           :chaps 3))
+    ("Philemon"        . (:name "Philemon"        :chaps 1))
+    ("Hebrews"         . (:name "Hebrews"         :chaps 13))
+    ("James"           . (:name "James"           :chaps 5))
+    ("1 Peter"         . (:name "1 Peter"         :chaps 5))
+    ("2 Peter"         . (:name "2 Peter"         :chaps 3))
+    ("1 John"          . (:name "1 John"          :chaps 5))
+    ("2 John"          . (:name "2 John"          :chaps 1))
+    ("3 John"          . (:name "3 John"          :chaps 1))
+    ("Jude"            . (:name "Jude"            :chaps 1))
+    ("Revelation"      . (:name "Revelation"      :chaps 22)))
+  "")
 
-(defun catholicbible--normalize-book (translation-norm canonical-name)
+(defun bible--get-book-alist (translation-norm)
+  (pcase translation-norm
+    ("knox"          catholicbible--knox-books)
+    ("douay_rheims"  catholicbible--douay-rheims-books)
+    ("vulgate"       catholicbible--vulgate-books)
+    ("esv"           esvbible--esv-books)
+    (_ (error "Unsupported translation: %s" translation))))
+
+(defun bible--normalize-book (translation-norm canonical-name)
   "Normalize book CANONICAL-NAME for normalized translation TRANSLATION-NORM.
 Returns a plist with :name and :url-path
 Raises an error if not found.
 
 Examples:
-(catholicbible--normalize-book \"vulgate\" \"Revelation\")
+(bible--normalize-book \"vulgate\" \"Revelation\")
 (:name \"Apocalypsi\" :url-path \"/NT/Apc\")
 "
-  (let* ((book-alist
-          (pcase translation-norm
-            ("knox"          catholicbible--knox-books)
-            ("douay_rheims"  catholicbible--douay-rheims-books)
-            ("vulgate"       catholicbible--vulgate-books)
-            (_ (error "Unsupported translation: %s" translation)))))
+  (let* ((book-alist (bible--get-book-alist translation-norm)))
     (or (assoc-default canonical-name book-alist #'string= nil)
         (error "Unknown book name: %s" canonical-name))))
 
-(defun catholicbible--get-chapnum (translation-norm canonical-name)
-  (let ((book-alist
-         (pcase translation-norm
-           ("knox"          catholicbible--knox-books)
-           ("douay_rheims"  catholicbible--douay-rheims-books)
-           ("vulgate"       catholicbible--vulgate-books)
-           (_ (error "Unsupported translation: %s" translation)))))
+(defun bible--get-chapnum (translation-norm canonical-name)
+  (let ((book-alist (bible--get-book-alist translation-norm)))
       (plist-get
        (cdr (assoc canonical-name book-alist))
        :chaps)))
