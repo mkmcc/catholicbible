@@ -22,7 +22,7 @@
     (cond
      ((member canon '("knox" "vulgate" "douay_rheims")) 'catholic)
      ((string= canon "esv") 'esv)
-     ((member canon '("kjv" "bsb")) 'api)
+     ((member canon '("eng_kjv" "bsb")) 'api)
                                         ;((string= canon "kjv") 'kjv)
      (t (error "Unknown translation: %s" translation)))))
 

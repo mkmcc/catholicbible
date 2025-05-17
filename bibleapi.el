@@ -214,11 +214,11 @@ Returns a flat list of plists."
   "Format a single VERSE element as LaTeX."
   (pcase (alist-get 'type verse)
     ("verse"
-     (format "\\verse{%d} %s"
+     (format "\\vs{%d} %s"
              (alist-get 'number verse)
              (alist-get 'content verse)))
     ("poem"
-     (format "\\verse{%d} %s"
+     (format "\\vs{%d} %s"
              (alist-get 'number verse)
              (alist-get 'content verse)))
     ("ellipsis"
