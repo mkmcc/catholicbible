@@ -20,9 +20,8 @@
 (require 'bible-normalize-input)
 (require 'bible-translation-books)
 
-(defvar bible-cachedir
-  (expand-file-name ".biblecache/" (getenv "HOME"))
-  "Root directory for cached Bible chapters.")
+(require 'bibleutils)
+
 
 ;;; Input Normalization
 
@@ -88,52 +87,13 @@ RANGE may be a number, a string like \"14-20\" or \"5\"."
    (format "%s/%s/ch_%d.html" translation url-path chapter)
    bible-cachedir))
 
-(defun catholicbible--ensure-dir (path)
-  (make-directory (file-name-directory path) t))
-
-(defun catholicbible--get-html-body-raw (url)
-  "Fetch URL and return trimmed HTML body, skipping HTTP headers.
-Returns nil if the request fails."
-  (let ((buf (url-retrieve-synchronously url t t 10)))
-    (if (not (buffer-live-p buf))
-        (progn
-          (message "Failed to fetch: %s" url)
-          nil)
-      (with-current-buffer buf
-        (goto-char (point-min))
-        (if (re-search-forward "\n\n" nil t)
-            (s-trim (buffer-substring-no-properties (point) (point-max)))
-          (progn
-            (message "No header-body separator found: %s" url)
-            nil))))))
-
-(defun catholicbible--fix-encoding (html)
-  (let* ((html1 (decode-coding-string html 'utf-8 t))
-         (html2 (s-replace "\r" "" html1)))
-    html2))
-
-(defun catholicbible--get-html-body (url)
-  "Fetch and decode the HTML body at URL, or return nil on failure."
-  (let ((raw (catholicbible--get-html-body-raw url)))
-    (when raw
-      (catholicbible--fix-encoding raw))))
-
 (defun catholicbible--fetch-chapter-helper (translation url-path chapter)
   "Return elquery DOM of the requested chapter, caching it if needed.
 TRANSLATION is standardized, CHAPTER is an integer"
   (let* ((url (catholicbible--chapter-url translation url-path chapter))
          (path (catholicbible--chapter-path translation url-path chapter)))
-    (catholicbible--ensure-dir path)
-    (if (file-exists-p path)
-        (elquery-read-file path)
-      (let ((html (catholicbible--get-html-body url)))
-        (unless html
-          (error "Download failed: %s" url))
-        (with-temp-buffer
-          (set-buffer-file-coding-system 'utf-8)
-          (insert html)
-          (write-region (point-min) (point-max) path nil 'quiet))
-        (elquery-read-string html)))))
+    (elquery-read-string
+     (bibleutils--get-html-body url path))))
 
 (defun catholicbible--fetch-chapter (translation canonical-book-name chapter)
   (let* ((pdata

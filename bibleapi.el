@@ -4,30 +4,27 @@
 (require 's)
 (require 'dash)
 
-;; TODO
-;; replace [poem] with \begin{poetry} or \end{poetry}
+(require 'bibleutils)
 
 (defvar bibleapi--root-url
   "https://bible.helloao.org/")
 
+(defun bibleapi--cache-path (url-path)
+  (expand-file-name
+   (s-chop-prefix "/" path)
+   bible-cachedir))
+
 (defun bibleapi--get-json (path)
-  "Synchronously fetch JSON data from PATH relative to the API root.
-Returns an alist or list parsed from the JSON response."
+  "Fetch JSON from PATH relative to API root."
   (let* ((url (format "%s/%s"
                       (s-chop-suffix "/" bibleapi--root-url)
                       (s-chop-prefix "/" path)))
-         (buf (url-retrieve-synchronously url t t 10)))
-    (unless (buffer-live-p buf)
-      (error "Failed to fetch endpoint: %s" path))
-    (with-current-buffer buf
-      (goto-char (point-min))
-      (unless (looking-at "HTTP/1.1 200 OK")
-        (kill-buffer)
-        (error "API call failed: %s" path))
-      (re-search-forward "\n\n" nil 'move)
-      (prog1
-          (json-parse-buffer :object-type 'alist :array-type 'list)
-        (kill-buffer (current-buffer))))))
+         (body (bibleutils--get-html-body url (bibleapi--cache-path path))))
+    (when body
+      (with-temp-buffer
+        (insert body)
+        (goto-char (point-min))
+        (json-parse-buffer :object-type 'alist :array-type 'list)))))
 
 (defun bibleapi--get-available-translations ()
   "Fetch available Bible translations and pass the parsed result to CALLBACK."

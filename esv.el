@@ -8,6 +8,7 @@
 (require 'url-util)
 (require 's)
 
+(require 'bibleutils)
 
 (defvar esv-api-token nil
   "API token for accessing the ESV passage API.")
@@ -30,17 +31,18 @@
 (defun esv-format-verses-text (reference)
   "Fetch the passage text for REFERENCE from the ESV API."
   (esv--require-token)
-  (let ((url-request-extra-headers
-         `(("Authorization" . ,(concat "Token " esv-api-token)))))
-    (with-current-buffer (url-retrieve-synchronously (esv--url reference) t t 10)
-      (goto-char (point-min))
-      (re-search-forward "\n\n") ;; Skip HTTP headers
-      (let* ((json-object-type 'alist)
-             (json-array-type 'list)
-             (json-key-type 'symbol)
-             (data (json-parse-buffer))
-             (passages (gethash "passages" data)))
-        (string-join passages "\n\n")))))
+  (let* ((headers `(("Authorization" . ,(concat "Token " esv-api-token))))
+         (body (bibleutils--get-html-body-raw (esv--url reference) headers)))
+    (when body
+      (with-temp-buffer
+        (insert body)
+        (goto-char (point-min))
+        (let ((json-object-type 'alist)
+              (json-array-type 'list)
+              (json-key-type 'symbol))
+          (let* ((data (json-parse-buffer))
+                 (passages (gethash "passages" data)))
+            (string-join passages "\n\n")))))))
 
 
 (defun esv--versify (s)
