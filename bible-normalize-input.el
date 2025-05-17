@@ -110,7 +110,12 @@
     ("douay-rheims" . "douay_rheims")
     ("d-r"          . "douay_rheims")
     ("esv"          . "esv")
-    ("kjv"          . "kjv"))
+    ("kjv"          . "eng_kjv")
+    ("eng_kjv"      . "eng_kjv")
+    ("king james"   . "eng_kjv")
+    ("bsb"          . "BSB")
+    ("berean"       . "BSB")
+    )
   "Mapping of lowercase translation aliases to canonical internal translation names.")
 
 (defun bible--normalize-translation (name)
@@ -118,4 +123,4 @@
 Raises error if unknown."
   (let* ((key (downcase name))
          (norm (assoc-default key bible--translation-aliases #'string=)))
-    (or norm (error "Unknown translation: %s" name))))
+    (or norm (error "Unknown translation2: %s" name))))

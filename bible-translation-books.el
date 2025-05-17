@@ -314,6 +314,8 @@
     ("douay_rheims"  catholicbible--douay-rheims-books)
     ("vulgate"       catholicbible--vulgate-books)
     ("esv"           esvbible--esv-books)
+    ("eng_kjv"       esvbible--esv-books) ; assume same as esv?
+    ("BSB"           esvbible--esv-books) ; assume same as esv?
     ("kjv"           esvbible--esv-books) ; assume same as esv?
     (_ (error "Unsupported translation: %s" translation))))
 
