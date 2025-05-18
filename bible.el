@@ -14,16 +14,16 @@
 (require 'kjv)
 (require 'bibleapi)
 
-;; TODO: use the (poem . 1) attribute for the poetry environment
 
 (defun bible--which-backend (translation)
   "Return the backend symbol ('catholic or 'esv) for TRANSLATION."
-  (let ((canon (downcase translation)))
+  (let ((canon (downcase (bible--normalize-translation
+                          translation))))
     (cond
      ((member canon '("knox" "vulgate" "douay_rheims")) 'catholic)
      ((string= canon "esv") 'esv)
      ((member canon '("eng_kjv" "bsb")) 'api)
-                                        ;((string= canon "kjv") 'kjv)
+     ;;((string= canon "kjv") 'kjv)
      (t (error "Unknown translation: %s" translation)))))
 
 ;;; Unified API
