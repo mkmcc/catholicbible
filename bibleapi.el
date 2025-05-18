@@ -148,7 +148,7 @@ Returns a new list of content elements with inserted ((type . \"line_break\")) w
 
 (defun bibleapi--get-verses-helper (translation-id canonical-book-name chapter-number range)
   (let* ((wanted (cond ((listp range) range)
-                       (t (catholicbible--expand-verse-spec range))))
+                       (t (bible--expand-verse-spec range))))
          (book-data (bibleapi--get-book-id translation-id canonical-book-name))
          (book-id (plist-get book-data :id))
          (items (bibleapi--get-chapter translation-id book-id chapter-number))
@@ -156,18 +156,17 @@ Returns a new list of content elements with inserted ((type . \"line_break\")) w
     (--filter (member (alist-get 'number it) wanted) verses)))
 
 (defun bibleapi--interleave-ellipsis (blocks)
-  "Join list of BLOCKS (lists of verses) with (:ellipsis t) in between.
-Returns a flat list of plists."
+  "Join list of BLOCKS (lists of verses) with (:ellipsis t) in between."
   (->> blocks
        (-interpose '(((type . "ellipsis"))))
        (-flatten-n 1)))
 
 (defun bibleapi--get-verses (translation canonical-book-name chapter range)
   "Return verses from RANGE in TRANSLATION with ellipsis inserted between gaps."
-  (let* ((wanted (catholicbible--expand-verse-spec range))
+  (let* ((wanted (bible--expand-verse-spec range))
          (all-verses (bibleapi--get-verses-helper translation canonical-book-name chapter wanted))
          (by-number (--group-by (alist-get 'number it) all-verses))
-         (groups (catholicbible--group-contiguous (mapcar #'car by-number)))
+         (groups (bible--group-contiguous (mapcar #'car by-number)))
          (blocks (--map (mapcar (lambda (n) (car (alist-get n by-number))) it) groups)))
     (bibleapi--interleave-ellipsis blocks)))
 

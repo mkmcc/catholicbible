@@ -124,3 +124,28 @@ Raises error if unknown."
   (let* ((key (downcase name))
          (norm (assoc-default key bible--translation-aliases #'string=)))
     (or norm (error "Unknown translation2: %s" name))))
+
+
+;;; Range parsing
+
+(defun bible--expand-verse-spec (spec)
+  "Expand comma-separated SPEC like \"3,5,7-10\" into a list of integers."
+  (->> (s-split "," spec t)
+       (-map #'catholicbible--normalize-verse-range)
+       (-flatten)))
+
+(defun bible--group-contiguous (numbers)
+  "Group NUMBERS into contiguous runs, e.g. (1 2 3 5) → ((1 2 3) (5))."
+  (let ((sorted (sort (copy-sequence numbers) #'<))
+        (groups '())
+        (current-group '())
+        (last nil))
+    (dolist (n sorted)
+      (if (or (null last) (= n (1+ last)))
+          (push n current-group)
+        (push (nreverse current-group) groups)
+        (setq current-group (list n)))
+      (setq last n))
+    (when current-group
+      (push (nreverse current-group) groups))
+    (nreverse groups)))

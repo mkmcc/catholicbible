@@ -52,30 +52,6 @@ RANGE may be a number, a string like \"14-20\" or \"5\"."
     (list (string-to-number (match-string 1 range))))
    (t (error "Invalid verse range: %S" range))))
 
-;;; Range parsing
-
-(defun catholicbible--expand-verse-spec (spec)
-  "Expand comma-separated SPEC like \"3,5,7-10\" into a list of integers."
-  (->> (s-split "," spec t)
-       (-map #'catholicbible--normalize-verse-range)
-       (-flatten)))
-
-(defun catholicbible--group-contiguous (numbers)
-  "Group NUMBERS into contiguous runs, e.g. (1 2 3 5) → ((1 2 3) (5))."
-  (let ((sorted (sort (copy-sequence numbers) #'<))
-        (groups '())
-        (current-group '())
-        (last nil))
-    (dolist (n sorted)
-      (if (or (null last) (= n (1+ last)))
-          (push n current-group)
-        (push (nreverse current-group) groups)
-        (setq current-group (list n)))
-      (setq last n))
-    (when current-group
-      (push (nreverse current-group) groups))
-    (nreverse groups)))
-
 ;;; Caching and fetching
 
 (defun catholicbible--chapter-url (translation url-path chapter)
@@ -193,7 +169,7 @@ TRANSLATION is standardized, CHAPTER is an integer"
   "Return a list of verses matching RANGE from BOOK and CHAPTER in TRANSLATION.
 RANGE may be a number, a string range, or a list of integers."
   (let* ((wanted (cond ((listp range) range)
-                       (t (catholicbible--expand-verse-spec range))))
+                       (t (bible--expand-verse-spec range))))
          (dom (catholicbible--fetch-chapter translation canonical-book-name chapter))
          (verses (catholicbible--parse-verses translation dom)))
     (--filter (member (plist-get it :verse) wanted) verses)))
@@ -207,10 +183,10 @@ Returns a flat list of plists."
 
 (defun catholicbible-get-verses (translation canonical-book-name chapter range)
   "Return verses from RANGE in TRANSLATION with ellipsis inserted between gaps."
-  (let* ((wanted (catholicbible--expand-verse-spec range))
+  (let* ((wanted (bible--expand-verse-spec range))
          (all-verses (catholicbible--get-verses-helper translation canonical-book-name chapter wanted))
          (by-number (--group-by (plist-get it :verse) all-verses))
-         (groups (catholicbible--group-contiguous (mapcar #'car by-number)))
+         (groups (bible--group-contiguous (mapcar #'car by-number)))
          (blocks (--map (mapcar (lambda (n) (car (alist-get n by-number))) it) groups)))
     (catholicbible--interleave-ellipsis blocks)))
 
