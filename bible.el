@@ -71,6 +71,29 @@ Then insert LaTeX-formatted verses at point."
   (insert
    (bible-format-verses-latex translation-name book-name chapter range)))
 
+(defun bible-insert-full-comparison-latex (book-name chapter range)
+  "Prompt for BOOK-NAME, CHAPTER, and RANGE.
+Then insert LaTeX-formatted verses at point for each of (KJV BSB ESV Knox Douay
+Vulgate)."
+  (interactive
+   (let ((completion-ignore-case t))  ;; makes all completions case-insensitive
+     (let* ((book
+             (completing-read "Book name: " catholicbible-canonical-list nil t))
+            (max-ch
+             (bible--get-chapnum "knox" book))
+            (chapter-str (completing-read
+                          (format "Chapter (1-%d): " max-ch)
+                          (mapcar #'number-to-string (number-sequence 1 max-ch))
+                          nil t))
+            (range
+             (read-string "Verse range (e.g. 4 or 1-5 or 1,3,7-10): ")))
+       (list book (string-to-number chapter-str) range))))
+  (--each
+      '("KJV" "BSB" "ESV" "Knox" "Douay" "Vulgate")
+    (progn
+      (bible-insert-verses-latex (bible--normalize-translation it) book-name chapter range)
+      (insert "\n\n"))))
+
 (defun bible--setup-latex-bindings ()
   (local-set-key (kbd "C-c v") #'bible-insert-verses-latex))
 

@@ -16,12 +16,10 @@ Returns a clean, decoded string safe for parsing."
          (cleaned (s-replace "\r" "" decoded)))
     cleaned))
 
-(defun bibleutils--get-html-body-raw (url &optional headers)
+(defun bibleutils--get-html-body-raw (url)
   "Fetch URL synchronously, skipping headers. Return raw body as string or nil.
-If HEADERS is non-nil, it should be an alist of additional HTTP headers.
- Suitable for HTML, JSON, or plain text responses."
-  (let ((url-request-extra-headers headers)
-        (buf (url-retrieve-synchronously url t t 10)))
+Suitable for HTML, JSON, or plain text responses."
+  (let ((buf (url-retrieve-synchronously url t t 10)))
     (if (not (buffer-live-p buf))
         (progn
           (message "Failed to fetch: %s" url)
@@ -48,8 +46,8 @@ If HEADERS is non-nil, it should be an alist of additional HTTP headers.
                  (buffer-substring-no-properties (point) (point-max)))
               (kill-buffer buf))))))))
 
-(defun bibleutils--get-html-body (url path &optional headers)
-  "Fetch HTML body from URL with optional HEADERS.
+(defun bibleutils--get-html-body (url path)
+  "Fetch HTML body from URL.
 If PATH is provided and the file exists, return its contents instead.
 If PATH is provided and the file does not exist, download and cache it to that location.
 Returns the UTF-8 decoded, cleaned body string."
@@ -62,7 +60,7 @@ Returns the UTF-8 decoded, cleaned body string."
           (insert-file-contents path)
           (buffer-substring-no-properties (point-min) (point-max))))
     ;; download and cache
-    (let ((html (bibleutils--get-html-body-raw url headers)))
+    (let ((html (bibleutils--get-html-body-raw url)))
       (unless html
         (error "Download failed for url `%s'" url))
       (when path
