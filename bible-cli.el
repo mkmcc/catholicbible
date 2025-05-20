@@ -1,4 +1,4 @@
-;;; bible-cli.el --- CLI interface to bible.el
+;;; bible-cli.el --- CLI interface to bible.el   -*- lexical-binding: t; -*-
 ;; Usage: emacs --script bible-cli.el TRANSLATION BOOK CHAPTER RANGE FORMAT
 
 ;; Example:

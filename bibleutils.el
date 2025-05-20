@@ -1,3 +1,4 @@
+;;; bibleutils.el ---   -*- lexical-binding: t; -*-
 (provide 'bibleutils)
 
 (require 's)
@@ -19,7 +20,7 @@ Returns a clean, decoded string safe for parsing."
 (defun bibleutils--get-html-body-raw (url)
   "Fetch URL synchronously, skipping headers. Return raw body as string or nil.
 Suitable for HTML, JSON, or plain text responses."
-  (let ((buf (url-retrieve-synchronously url t t 10)))
+  (let ((buf (url-retrieve-synchronously url t t 20)))
     (if (not (buffer-live-p buf))
         (progn
           (message "Failed to fetch: %s" url)

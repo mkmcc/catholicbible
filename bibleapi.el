@@ -1,3 +1,4 @@
+;;; bibleapi.el ---   -*- lexical-binding: t; -*-
 (provide 'bibleapi)
 
 (require 'json)
@@ -11,7 +12,7 @@
 
 (defun bibleapi--cache-path (url-path)
   (expand-file-name
-   (s-chop-prefix "/" path)
+   (s-chop-prefix "/" url-path)
    bible-cachedir))
 
 (defun bibleapi--get-json (path)
