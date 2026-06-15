@@ -12,6 +12,8 @@ Supports Knox, Douay-Rheims, and Vulgate translations with LaTeX and plaintext o
   - LaTeX (using the [`scripture`](https://ctan.org/pkg/scripture) package)
   - Plain text
 
+<img src="./bible_demo.gif" alt="Terminal Demo" width="800">
+
 ## Usage
 
 ### commandline
